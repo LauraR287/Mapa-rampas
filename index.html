@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>Mapa de Rampas Detectadas</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDO7DM04sKP33P3vi2KZyyCdi6A_oQEvnM&callback=initMap" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
       #map {
@@ -24,7 +24,7 @@
           zoom: 12
         });
 
-        // Leer el archivo CSV con PapaParse
+        // Leer el archivo CSV desde GitHub con PapaParse (URL RAW)
         Papa.parse('https://raw.githubusercontent.com/laurar287/Mapa-rampas/main/rampas_con_coordenadas.csv', {
           download: true,
           header: true,
@@ -54,6 +54,7 @@
         rampasData.forEach(function(rampa) {
           // Asegúrate de que las coordenadas estén disponibles
           if (rampa.rampa_lat && rampa.rampa_lon) {
+            // Crear marcador para cada rampa
             var marker = new google.maps.Marker({
               position: {lat: rampa.rampa_lat, lng: rampa.rampa_lon},
               map: map,
