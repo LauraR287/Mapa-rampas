@@ -1,39 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mapa de Rampas Detectadas</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDO7DM04sKP33P3vi2KZyyCdi6A_oQEvnM&callback=initMap" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
+      body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+
+      h3 {
+        text-align: center;
+        font-size: 2rem;
+        margin-top: 20px;
+        color: #333;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      /* Estilo para la sección de descripción */
+      .description {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+        text-align: justify;
+      }
+
+      .description h4 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        color: #333;
+      }
+
+      .description p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: #555;
+      }
+
       #map {
-        height: 500px;
+        height: 600px;
         width: 100%;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        margin-top: 20px;
+        margin-bottom: 40px;
+      }
+
+      footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9rem;
+        color: #777;
+      }
+
+      /* Estilo responsivo */
+      @media screen and (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+
+        h3 {
+          font-size: 1.5rem;
+        }
+
+        #map {
+          height: 400px;
+        }
+
+        .container {
+          padding: 10px;
+        }
       }
     </style>
   </head>
   <body>
-    <h3>Mapa de Rampas Detectadas</h3>
-    <div id="map"></div>
+    <div class="container">
+      <!-- Sección de Descripción del Problema y Proceso -->
+      <div class="description">
+        <h4>Introducción al Problema</h4>
+        <p>
+          En muchas ciudades del mundo, las personas con movilidad reducida enfrentan dificultades importantes debido a la falta de rampas de acceso adecuadas. Estas barreras físicas limitan su capacidad para desplazarse de forma independiente, afectando su calidad de vida y su participación activa en la sociedad. El diseño y la construcción de infraestructuras accesibles son esenciales para garantizar la igualdad de oportunidades y el derecho a la movilidad para todos los ciudadanos.
+        </p>
+
+        <h4>Proceso Utilizado para Crear el Mapa</h4>
+        <p>
+          Este mapa interactivo ha sido creado utilizando imágenes de las calles, en las cuales se ha detectado la presencia de rampas mediante un modelo de <strong>detección de objetos</strong> y <strong>segmentación</strong>. Primero, las imágenes fueron procesadas para identificar las ubicaciones de las rampas mediante un modelo de <strong>detección de rampas</strong>. Luego, se aplicó un modelo de <strong>segmentación</strong> para obtener las máscaras precisas de las rampas y así mejorar la exactitud en la localización.
+        </p>
+
+        <h4>¿Cómo Utilizar el Mapa?</h4>
+        <p>
+          Este mapa puede ser utilizado para verificar la existencia de rampas en diferentes áreas urbanas. Además, se puede actualizar regularmente para mantener la información actualizada. Los usuarios pueden explorar el mapa y verificar la ubicación de las rampas, mientras que las autoridades gubernamentales pueden utilizar esta herramienta para identificar áreas que necesitan ser mejoradas o nuevas rampas que deben ser construidas, facilitando así la creación de una ciudad más accesible para todos.
+        </p>
+      </div>
+
+      <h3>Mapa de Rampas Detectadas</h3>
+      <div id="map"></div>
+    </div>
+
     <script>
       var map;
 
-      // Función para inicializar el mapa de Google Maps
       function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 4.60971, lng: -74.08175},  // Coordenadas iniciales (por ejemplo, Bogotá)
           zoom: 12
         });
 
-        // Leer el archivo CSV desde GitHub con PapaParse (URL RAW)
+        // Leer el archivo CSV desde GitHub con PapaParse
         Papa.parse('https://raw.githubusercontent.com/laurar287/Mapa-rampas/main/rampas_con_coordenadas.csv', {
           download: true,
           header: true,
           dynamicTyping: true,
           complete: function(results) {
-            // Verificar que el CSV se lea correctamente
             console.log("Resultados del CSV:", results);  // Ver los resultados del CSV en la consola
-
-            // Si los datos son correctos, continuar con la adición de marcadores
             if (results.data && results.data.length > 0) {
               addMarkers(results.data);
             } else {
@@ -46,32 +138,28 @@
         });
       }
 
-      // Función para agregar los marcadores al mapa
       function addMarkers(rampasData) {
-        // Verificar que los datos de las rampas tienen las coordenadas correctas
-        console.log("Datos de las rampas:", rampasData);  // Ver los datos de las rampas en la consola
-
         rampasData.forEach(function(rampa) {
-          // Asegúrate de que las coordenadas estén disponibles
           if (rampa.rampa_lat && rampa.rampa_lon) {
-            // Crear marcador para cada rampa
             var marker = new google.maps.Marker({
               position: {lat: rampa.rampa_lat, lng: rampa.rampa_lon},
               map: map,
               title: 'Rampa ' + rampa.rampa_id
             });
 
-            // Agregar información adicional a cada marcador, como un popup
             var infoWindow = new google.maps.InfoWindow({
-              content: `Rampa ID: ${rampa.rampa_id}<br>Lat: ${rampa.rampa_lat}, Lon: ${rampa.rampa_lon}`
+              content: `
+                <div style="font-size: 1.2rem; color: #333;">
+                  <strong>Rampa ${rampa.rampa_id}</strong><br>
+                  <span style="color: #007BFF;">Latitud:</span> ${rampa.rampa_lat}<br>
+                  <span style="color: #007BFF;">Longitud:</span> ${rampa.rampa_lon}
+                </div>
+              `
             });
 
-            // Al hacer clic en el marcador, mostrar el popup con la información
             marker.addListener('click', function() {
               infoWindow.open(map, marker);
             });
-          } else {
-            console.log(`Rampa ${rampa.rampa_id} no tiene coordenadas válidas.`);
           }
         });
       }
